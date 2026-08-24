@@ -1,0 +1,216 @@
+[
+    {
+        "timestamp": "2026-08-20T13:04:19.009950+00:00",
+        "symbol": "XRPUSDT",
+        "direction": "LONG \ud83d\udfe2",
+        "entry_price": 1.1101,
+        "stop_loss": 1.1019115978273843,
+        "take_profit": 1.134665206517847,
+        "rr_ratio": 2.999999999999973,
+        "position_size": 2442.478957236083,
+        "risk_pct": 0.02,
+        "supervisor_reason": "Technical analysis shows a bullish price pattern on the 15\u2011minute chart, providing the primary upside driver for XRPUSDT despite weak momentum.",
+        "tech_signal": "BUY",
+        "macro_signal": "SELL",
+        "sentiment": "BUY",
+        "fund_signal": "BUY"
+    },
+    {
+        "timestamp": "2026-08-20T13:15:05.008276+00:00",
+        "symbol": "XRPUSDT",
+        "direction": "LONG \ud83d\udfe2",
+        "entry_price": 1.1115,
+        "stop_loss": 1.1034571979825711,
+        "take_profit": 1.1356284060522865,
+        "rr_ratio": 3.0000000000000275,
+        "position_size": 2486.6955517069537,
+        "risk_pct": 0.02,
+        "supervisor_reason": "The TechnicalAgent's strong bullish indicators and the FundamentalAgent's positive momentum analysis provide a compelling case for a buy signal, despite the critical conflicts.",
+        "tech_signal": "BUY",
+        "macro_signal": "SELL",
+        "sentiment": "BUY",
+        "fund_signal": "BUY"
+    },
+    {
+        "timestamp": "2026-08-20T13:22:35.567947+00:00",
+        "symbol": "XRPUSDT",
+        "direction": "LONG \ud83d\udfe2",
+        "entry_price": 1.1115,
+        "stop_loss": 1.1034571979825711,
+        "take_profit": 1.1356284060522865,
+        "rr_ratio": 3.0000000000000275,
+        "position_size": 2486.6955517069537,
+        "risk_pct": 0.02,
+        "supervisor_reason": "The TechnicalAgent's strong bullish indicators and the FundamentalAgent's positive momentum and volume data provide a compelling case for a buy signal.",
+        "tech_signal": "BUY",
+        "macro_signal": "SELL",
+        "sentiment": "BUY",
+        "fund_signal": "BUY",
+        "tech_reason": [
+            "The strong uptrend and multiple bullish indicators outweigh the overextension near the upper Bollinger Band."
+        ]
+    },
+    {
+        "timestamp": "2026-08-20T13:45:05.003969+00:00",
+        "symbol": "XRPUSDT",
+        "direction": "LONG \ud83d\udfe2",
+        "entry_price": 1.1104,
+        "stop_loss": 1.1028138594849721,
+        "take_profit": 1.1331584215450838,
+        "rr_ratio": 3.0,
+        "position_size": 2636.3867055165383,
+        "risk_pct": 0.02,
+        "supervisor_reason": "The TechnicalAgent's strong bullish signal and the majority consensus (3 out of 5 agents) favoring a BUY stance are compelling despite significant conflicts.",
+        "tech_signal": "BUY",
+        "macro_signal": "SELL",
+        "sentiment": "BUY",
+        "fund_signal": "BUY",
+        "tech_reason": [
+            "The strong uptrend and multiple bullish indicators outweigh the overextension near the upper Bollinger Band."
+        ]
+    },
+    {
+        "timestamp": "2026-08-20T13:47:33.562250+00:00",
+        "symbol": "XRPUSDT",
+        "direction": "LONG \ud83d\udfe2",
+        "entry_price": 1.1104,
+        "stop_loss": 1.1028138594849721,
+        "take_profit": 1.1331584215450838,
+        "rr_ratio": 3.0,
+        "position_size": 2636.3867055165383,
+        "risk_pct": 0.02,
+        "supervisor_reason": "The TechnicalAgent's strong bullish signal is supported by the FundamentalAgent and SentimentAgent, despite their lower scores, indicating a potential upward momentum in XRPUSDT.",
+        "tech_signal": "BUY",
+        "macro_signal": "SELL",
+        "sentiment": "BUY",
+        "fund_signal": "BUY",
+        "tech_reason": [
+            "The strong uptrend and multiple bullish indicators outweigh the overextension near the upper Bollinger Band."
+        ],
+        "macro_reason": [
+            "High US interest rates and yields make holding non-yielding assets like Bitcoin less attractive, while a strong dollar index suggests investors may prefer traditional safe-haven assets over cryptocurrencies."
+        ],
+        "sentiment_reason": [
+            "The news includes several positive developments such as regulatory advancements, institutional investments, and new product launches, but also mentions losses and liquidations, indicating a mixed but slightly bullish sentiment."
+        ],
+        "fund_reason": [
+            "The network shows modest price momentum and stable volume, indicating potential growth without significant speculative activity."
+        ]
+    },
+    {
+        "timestamp": "2026-08-20T13:51:09.488904+00:00",
+        "symbol": "BTCUSDT",
+        "direction": "SHORT \ud83d\udd34",
+        "entry_price": 63061.02,
+        "stop_loss": 63516.95132822652,
+        "take_profit": 61693.22601532043,
+        "rr_ratio": 3.0,
+        "position_size": 0.04386625520513337,
+        "risk_pct": 0.02,
+        "supervisor_reason": "The majority of agents (Technical, Macro, and Fundamental) are signaling a sell, driven by bearish technical indicators, macroeconomic headwinds, and fundamental concerns about price momentum and volume.",
+        "tech_signal": "SELL",
+        "macro_signal": "SELL",
+        "sentiment": "BUY",
+        "fund_signal": "SELL",
+        "tech_reason": [
+            "The strong downtrend and price below key EMAs indicate bearish momentum, despite a bullish MACD crossover."
+        ],
+        "macro_reason": [
+            "High US interest rates and yields, coupled with a strong dollar, create a bearish environment for cryptocurrencies like Bitcoin."
+        ],
+        "sentiment_reason": [
+            "The news includes several positive developments such as regulatory advancements, institutional investments, and new product launches, but also mentions losses and liquidations, indicating a mixed but slightly bullish sentiment."
+        ],
+        "fund_reason": [
+            "The network shows modest price momentum but low volume relative to its average, indicating potential consolidation rather than strong growth or distribution."
+        ]
+    },
+    {
+        "timestamp": "2026-08-22T15:17:19.007215+00:00",
+        "symbol": "BTCUSDT",
+        "direction": "SHORT \ud83d\udd34",
+        "entry_price": 77210.55,
+        "stop_loss": 77749.66667595704,
+        "take_profit": 75593.19997212892,
+        "rr_ratio": 2.999999999999973,
+        "position_size": 0.0370977209423106,
+        "risk_pct": 0.02,
+        "supervisor_reason": "Comprehensive driver 1: The majority of agents (Technical, Macro, Fundamental) are signaling a sell, driven by strong technical indicators, bearish macroeconomic conditions, and negative fundamental metrics. These signals collectively point towards a downward trajectory for BTCUSDT.",
+        "supervisor_score": -60.0,
+        "tech_signal": "SELL",
+        "macro_signal": "SELL",
+        "sentiment": "BUY",
+        "fund_signal": "SELL",
+        "tech_reason": [
+            "The cryptocurrency is in a strong downtrend with all EMAs indicating a downward slope. The ADX confirms a strong trend, which in this case is bearish. The MACD has shown a bearish crossover, and the price is trading below the VWAP, both of which are bearish signals. The RSI is neutral, but it does not counteract the other bearish indicators."
+        ],
+        "macro_reason": [
+            "The current macroeconomic environment is predominantly bearish for Bitcoin trading. High US interest rates and a strong US dollar index make holding non-yielding assets like Bitcoin less attractive compared to traditional investments. Additionally, the high US 10Y yield suggests that investors might prefer bonds over cryptocurrencies. While inflation remains moderate, it does not provide a strong enough tailwind to offset the negative impacts of high interest rates and a strong dollar. The relatively low VIX indicates market stability, but this does not counteract the other bearish factors."
+        ],
+        "sentiment_reason": [
+            "The headlines show a mix of regulatory concerns, technological advancements, and market movements. The CFTC's potential regulation and MiCA's crackdown on USDT in Europe indicate regulatory pressures that could be bearish. However, positive developments such as Binance's AI integration, Bitcoin miners investing in AI, and Bitcoin price reaching $72.5K suggest optimism and bullish sentiment. The rally in Bitcoin after Jim Cramer's sell-off further indicates strong market interest and FOMO among investors."
+        ],
+        "fund_reason": [
+            "The negative price momentum and low volume ratio suggest bearish sentiment. However, the relatively high number of active addresses and hash rate indicate some level of network activity and security. The total fees in USD also show that transactions are still occurring, but at a reduced volume compared to the 20-day average."
+        ]
+    },
+    {
+        "timestamp": "2026-08-24T13:39:58.047346+00:00",
+        "symbol": "BNBUSDT",
+        "direction": "LONG \ud83d\udfe2",
+        "entry_price": 703.38,
+        "stop_loss": 699.0584619122013,
+        "take_profit": 716.344614263396,
+        "rr_ratio": 3.0,
+        "position_size": 4.627981888315995,
+        "risk_pct": 0.02,
+        "supervisor_reason": "Comprehensive driver 1: Despite significant conflicts with MacroAgent and RiskAgent, the consensus rule mandates a BUY signal. The TechnicalAgent's strong bullish signal (85) is supported by FundamentalAgent (20) and SentimentAgent (30), indicating a broad-based positive sentiment across multiple dimensions. The TechnicalAgent's robust technical indicators (ADX < 25, Bollinger Bands squeeze) suggest a strong trend continuation, while the FundamentalAgent highlights network health and growth, and SentimentAgent notes positive market developments.",
+        "supervisor_score": 45.0,
+        "tech_signal": "BUY",
+        "macro_signal": "SELL",
+        "sentiment": "BUY",
+        "fund_signal": "BUY",
+        "tech_reason": [
+            "The Macro Regime is strongly bullish, and the SMC structure confirms a bullish Break of Structure (BOS) within a Bullish Fair Value Gap (FVG). The volume metrics indicate high institutional accumulation, further supporting the bullish trend. The ADX is below 25, indicating a strong trend but not extremely overbought, and the Bollinger Bands squeeze suggests potential for expansion."
+        ],
+        "macro_reason": [
+            "The current macroeconomic environment is predominantly bearish for Bitcoin trading. High US interest rates and a strong US dollar index make holding non-yielding assets like Bitcoin less attractive compared to traditional investments such as bonds or dollar-denominated assets. Additionally, the relatively high US 10-year yield suggests that investors might prefer fixed-income securities over volatile cryptocurrencies. While inflation remains moderate, it does not provide a strong enough tailwind to offset the negative impacts of high interest rates and a strong dollar. The VIX, indicating market volatility, is at a moderate level, which can be both a risk and an opportunity in crypto markets but does not lean towards a bullish sentiment given other factors.",
+            "REVISED: Peer critique: Your SELL signal is REJECTED. It strictly violates the Macro Bullish Trend (Price > EMA200 / Cloud). Shorting in a strong uptrend is prohibited."
+        ],
+        "sentiment_reason": [
+            "The news includes a mix of positive and neutral developments, but leans slightly towards positive sentiment. Positive developments include Bitcoin rising due to Treasury's actions, Solana improving its blockchain efficiency, Laser Digital receiving regulatory approval, Binance employees being cleared, Bitcoin ETF inflows, and Bitcoin strategy treasury hitting breakeven. Negative developments are limited to MANTRA token's decline and South Korean lawmakers seeking expanded powers over unregistered crypto firms, which could imply regulatory tightening. The overall tone suggests a cautiously optimistic market."
+        ],
+        "fund_reason": [
+            "The cryptocurrency shows a modest price momentum of 0.12% over the past 30 days, indicating a slight upward trend. The volume ratio of 1.59 suggests that current trading volume is higher than the 20-day average, which could indicate increased interest or speculative buying. The active addresses count of 402,442 and hash rate of 1,020,266,338 TH/s suggest a healthy level of network activity and security. However, the total fees of $144,344 might be considered low relative to the network's size, potentially indicating lower transaction volumes or fees. Overall, these metrics lean towards a network showing signs of growth and accumulation."
+        ]
+    },
+    {
+        "timestamp": "2026-08-24T14:02:21.212134+00:00",
+        "symbol": "ICXUSDT",
+        "direction": "SHORT \ud83d\udd34",
+        "entry_price": 0.0155,
+        "stop_loss": 0.01639862712875901,
+        "take_profit": 0.012804118613722968,
+        "rr_ratio": 3.000000000000004,
+        "position_size": 22256.172065069597,
+        "risk_pct": 0.02,
+        "supervisor_reason": "Comprehensive driver 1: The majority of agents (Technical, Macro, Fundamental) are signaling a strong sell due to bearish technical indicators, macroeconomic headwinds, and negative fundamental metrics. These signals align with a broader consensus against ICXUSDT.",
+        "supervisor_score": -80.0,
+        "tech_signal": "SELL",
+        "macro_signal": "SELL",
+        "sentiment": "BUY",
+        "fund_signal": "SELL",
+        "tech_reason": [
+            "The Macro Regime is strongly bearish, and the SMC structure confirms a bearish Break of Structure (BOS). The volume ratio is high, and the Chaikin Money Flow (CMF) indicates institutional distribution, further supporting the bearish trend. The ADX is above 25, indicating a strong trend, and the RSI is below 30, suggesting oversold conditions but still within the bearish trend."
+        ],
+        "macro_reason": [
+            "The current macroeconomic environment is predominantly bearish for Bitcoin trading. High US interest rates and a strong US dollar index make holding non-yielding assets like Bitcoin less attractive compared to traditional investments. Additionally, the relatively high US 10-year yield and the restrictive monetary policy suggest that investors might prefer safer, higher-yielding assets over volatile cryptocurrencies."
+        ],
+        "sentiment_reason": [
+            "The news includes a mix of positive and neutral developments. Positive developments include Bitcoin rising due to Treasury actions, Solana improving its blockchain efficiency, Laser Digital receiving regulatory approval, Binance employees being cleared, Bitcoin ETF inflows, and a strategy Bitcoin treasury hitting breakeven. Negative developments include the MANTRA token sinking and South Korean lawmakers seeking expanded powers over unregistered crypto firms. The overall sentiment leans slightly bullish due to the positive developments outweighing the negative ones."
+        ],
+        "fund_reason": [
+            "The 30-day price momentum of -9.56% indicates a bearish trend in the price. The volume ratio of 14.85 suggests high trading activity relative to the 20-day average, which could be indicative of selling pressure. However, the active addresses count of 402,442 and hash rate of 1,020,266,338 TH/s suggest a stable level of network participation and security. The total fees of $144,344 indicate ongoing transaction activity, but not necessarily accumulation or growth."
+        ]
+    }
+]
