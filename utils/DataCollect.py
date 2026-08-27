@@ -3,6 +3,7 @@
 
 from datetime import datetime, timedelta, timezone
 from typing import Optional, Tuple, Union
+import logging
 import yfinance as yf
 import ccxt
 from fredapi import Fred
@@ -11,6 +12,10 @@ import trafilatura
 import pandas as pd
 import requests
 
+from utils.config import FRED_API_KEY
+from utils.retry import retry_on_exception
+
+logger = logging.getLogger(__name__)
 
 pd.set_option('future.no_silent_downcasting', True)
 
@@ -34,7 +39,7 @@ class DataCollector:
         self.time_frame = time_frame
         self.start_time = start_time
         self.finish_time = finish_time
-        self.fred_api_key = fred_api_key or "aa8e898ee0c86dcf8ed920a05de79548"
+        self.fred_api_key = fred_api_key or FRED_API_KEY
         # منطقه زمانی UTC برای تمام عملیات‌ها
         self.utc_tz = timezone.utc
 
@@ -47,7 +52,7 @@ class DataCollector:
         
         if self.live_data:
             try:
-                print(f"[DataCollector] Fetching LIVE data from Binance via ccxt: {symbol_ccxt} {self.time_frame} {self.utc_tz}")
+                logger.info(f"[DataCollector] Fetching LIVE data from Binance via ccxt: {symbol_ccxt} {self.time_frame} {self.utc_tz}")
                 exchange = ccxt.binance()
                 
                 # دریافت 1000 کندل اخیر (برای محاسبه EMA_200 و سایر اندیکاتورها)
@@ -68,8 +73,8 @@ class DataCollector:
                 return price
                 
             except Exception as e:
-                print(f"[DataCollector] Error fetching Binance data via ccxt: {e}")
-                print("[DataCollector] Falling back to yfinance (may have delay)...")
+                logger.error(f"[DataCollector] Error fetching Binance data via ccxt: {e}")
+                logger.warning("[DataCollector] Falling back to yfinance (may have delay)...")
                 price = yf.download(self.coin, period="5d", interval=self.time_frame, auto_adjust=False)
         else:
             # برای بک‌تست همچنان از یاهو فایننس استفاده می‌کنیم
@@ -115,7 +120,7 @@ class DataCollector:
             interest_rate = fred.get_series("FEDFUNDS", observation_start=start_date)
             cpi = fred.get_series("CPIAUCSL", observation_start=start_date)
         except Exception as e:
-            print(f"Error fetching FRED data: {e}")
+            logger.error(f"Error fetching FRED data: {e}")
             return pd.DataFrame()
 
         inflation_yoy = cpi.pct_change(12, fill_method=None) * 100
@@ -145,7 +150,7 @@ class DataCollector:
                 "GC=F": "Gold",
             })
         except Exception as e:
-            print(f"Error fetching yfinance macro data: {e}")
+            logger.error(f"Error fetching yfinance macro data: {e}")
             yf_data = pd.DataFrame()
 
         # ترکیب داده‌ها و پر کردن مقادیر گمشده
@@ -205,7 +210,7 @@ class DataCollector:
                         "link": link,
                     })
             except Exception as e:
-                print(f"Error fetching {source}: {e}")
+                logger.error(f"Error fetching {source}: {e}")
 
         return pd.DataFrame(news_list)
 
@@ -225,7 +230,7 @@ class DataCollector:
                 if response.status_code == 200:
                     return response.json().get('values', [])
             except Exception as e:
-                print(f"Error fetching on-chain chart {chart_name}: {e}")
+                logger.error(f"Error fetching on-chain chart {chart_name}: {e}")
             return []
 
         # دریافت داده‌های خام
@@ -273,6 +278,7 @@ class DataCollector:
         return onchain_df
 
     # ---------- بخش ۵: متدهای اصلی جمع‌آوری ----------
+    @retry_on_exception(max_retries=2, delay=3.0, backoff=2.0, exceptions=(Exception,))
     def collect_data(self) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         """
         Collect all data: price, macro, news, and on-chain metrics.

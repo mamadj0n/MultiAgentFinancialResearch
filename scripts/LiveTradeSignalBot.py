@@ -4,6 +4,7 @@ import json
 import time
 import signal
 import logging
+import tempfile
 import numpy as np
 import pandas as pd
 from datetime import datetime, timezone, timedelta
@@ -15,7 +16,7 @@ PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
-from utils.config import COIN, TIME_FRAME
+from utils.config import COIN, TIME_FRAME, TP_MULTIPLIER, INITIAL_CAPITAL
 from memory_store import MemoryStore
 from utils.DataCollect import DataCollector
 from utils.FeatureEngineer import FeatureEngineering
@@ -33,15 +34,8 @@ from agents.memory_agent import MemoryAgent
 # =====================================================================
 # 1. تنظیمات لاگ‌گذاری روی دیسک
 # =====================================================================
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S',
-    handlers=[
-        logging.FileHandler("signal_bot_log.txt", mode='a', encoding='utf-8'),
-        logging.StreamHandler()
-    ]
-)
+from utils.log_config import setup_logging
+setup_logging("signal_bot.log")
 logger = logging.getLogger(__name__)
 
 # =====================================================================
@@ -65,8 +59,16 @@ class SignalGenerator:
             self.signals_history = []
 
     def save_signals(self):
-        with open(self.signals_file, 'w') as f:
-            json.dump(self.signals_history, f, indent=4)
+        dir_name = os.path.dirname(self.signals_file) or "."
+        fd, tmp_path = tempfile.mkstemp(dir=dir_name, suffix=".tmp")
+        try:
+            with os.fdopen(fd, 'w', encoding='utf-8') as f:
+                json.dump(self.signals_history, f, indent=4)
+            os.replace(tmp_path, self.signals_file)
+        except Exception:
+            if os.path.exists(tmp_path):
+                os.remove(tmp_path)
+            raise
 
     def generate_and_log_signal(self, final_decision: AgentOutput, outputs: List[AgentOutput], current_price: float, atr: float, timestamp: str) -> dict:
             signal_type = final_decision.signal
@@ -95,12 +97,12 @@ class SignalGenerator:
             if signal_type == SignalType.BUY:
                 entry_price = current_price
                 stop_loss = current_price - stop_distance
-                take_profit = current_price + (stop_distance * 3)
+                take_profit = current_price + (stop_distance * TP_MULTIPLIER)
                 direction = "LONG 🟢"
             elif signal_type == SignalType.SELL:
                 entry_price = current_price
                 stop_loss = current_price + stop_distance
-                take_profit = current_price - (stop_distance * 3)
+                take_profit = current_price - (stop_distance * TP_MULTIPLIER)
                 direction = "SHORT 🔴"
             else:
                 return {}
@@ -147,7 +149,7 @@ class LiveSignalBot:
         self.memory_store = MemoryStore()
         
         # تولیدکننده سیگنال جایگزین Portfolio Manager شد
-        self.signal_generator = SignalGenerator(initial_capital=1000)
+        self.signal_generator = SignalGenerator(initial_capital=INITIAL_CAPITAL)
         self.signal_generator.symbol = symbol 
 
         self.agents_dict = {

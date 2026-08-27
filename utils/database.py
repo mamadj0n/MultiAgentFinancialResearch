@@ -1,7 +1,7 @@
 import aiosqlite
 import logging
 
-logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 DB_NAME = "bot_database.db"
 
 async def init_db():

@@ -98,9 +98,13 @@ class MemoryAgent(DiscussingAgent):
     def critique_others(self, context: DiscussionContext) -> List[DebateMessage]:
         messages = []
         my_op = context.my_previous_opinion
-        if my_op and my_op.score < -20: # اگر تاریخچه بد است
+        if my_op and my_op.score < -20:
             for name, op in context.other_agents_latest_opinions.items():
-                if op.signal != SignalType.NEUTRAL and op.signal != SignalType.SELL if my_op.score < 0 else SignalType.BUY:
+                if my_op.score < 0:
+                    is_opposing = op.signal != SignalType.NEUTRAL and op.signal != SignalType.SELL
+                else:
+                    is_opposing = op.signal != SignalType.NEUTRAL and op.signal != SignalType.BUY
+                if is_opposing:
                     messages.append(DebateMessage(
                         message_id="", sender=self.name, target=name,
                         message_type=MessageType.CRITIQUE,
@@ -110,9 +114,13 @@ class MemoryAgent(DiscussingAgent):
         return messages
 
     def revise_opinion(self, context: DiscussionContext) -> AgentOpinion:
+        my_prev = context.my_previous_opinion
+        if not my_prev:
+            return self.analyze_independent(context)
+
         return AgentOpinion(
-            agent_name=self.name, round_number=2, signal=context.my_previous_opinion.signal,
-            confidence=context.my_previous_opinion.confidence, score=context.my_previous_opinion.score,
-            reasoning=context.my_previous_opinion.reasoning, key_evidence=context.my_previous_opinion.key_evidence,
-            acknowledged_risks=context.my_previous_opinion.acknowledged_risks, changed_from_previous=False
+            agent_name=self.name, round_number=2, signal=my_prev.signal,
+            confidence=my_prev.confidence, score=my_prev.score,
+            reasoning=my_prev.reasoning, key_evidence=my_prev.key_evidence,
+            acknowledged_risks=my_prev.acknowledged_risks, changed_from_previous=False
         )

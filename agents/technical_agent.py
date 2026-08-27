@@ -7,6 +7,7 @@ from .agent_architecture_core import (
     BaseAgent, AgentOutput, SignalType, MarketContext, DiscussingAgent,
     DiscussionContext, AgentOpinion, DebateMessage, MessageType, RoundType, SharedLLMEngine
 )
+from utils.config import TECH_BUY_THRESHOLD, TECH_SELL_THRESHOLD
 
 
 class TechnicalAgent(DiscussingAgent):
@@ -136,17 +137,6 @@ Return Output ONLY as a valid JSON object:
   "key_evidence": ["Evidence 1", "Evidence 2"]
 }}"""
 
-    def _parse_llm_response(self, response: str) -> Dict[str, Any]:
-        try:
-            data = json.loads(response)
-            return {
-                "score": float(data.get("score", 0)),
-                "reasoning": data.get("reasoning", "Multi-layer technical evaluation complete."),
-                "evidence": data.get("key_evidence", [])
-            }
-        except (json.JSONDecodeError, KeyError, ValueError):
-            return {"score": 0, "reasoning": "Failed to parse technical response", "evidence": []}
-
     def analyze(self, context: MarketContext) -> AgentOutput:
         start_time = time.time()
 
@@ -161,8 +151,7 @@ Return Output ONLY as a valid JSON object:
 
         latest = context.latest_bar
         prompt = self._build_technical_prompt(latest)
-        
-        # تغییر پرامپت سیستم برای تاکید بیشتر بر روند
+
         system_prompt = (
             "You are an uncompromising Trend-Following Technical Trader. You NEVER issue counter-trend signals. "
             "If the trend is Bearish, your maximum action is NEUTRAL. If the trend is Bullish, your maximum action is NEUTRAL for shorts. "
@@ -170,15 +159,15 @@ Return Output ONLY as a valid JSON object:
         )
 
         llm_response = self.llm_engine.generate(prompt, system_prompt)
-        parsed = self._parse_llm_response(llm_response)
+        parsed = self.parse_llm_json(llm_response, "TechnicalAgent")
 
         score = parsed["score"]
         reasoning = parsed["reasoning"]
         evidence = parsed["evidence"]
 
-        if score >= 45:
+        if score >= TECH_BUY_THRESHOLD:
             signal = SignalType.BUY
-        elif score <= -45:
+        elif score <= TECH_SELL_THRESHOLD:
             signal = SignalType.SELL
         else:
             signal = SignalType.NEUTRAL

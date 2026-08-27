@@ -2,6 +2,7 @@ import asyncio
 import logging
 import json
 import os
+import signal
 from aiogram import Bot, Dispatcher, F, types
 from aiogram.filters import Command, CommandStart
 from aiogram.fsm.context import FSMContext
@@ -20,8 +21,9 @@ from utils.database import init_db, save_user_settings, get_user, set_user_activ
 from utils.keyboards import main_menu_kb, symbol_kb, timeframe_kb, confirm_kb
 from utils.signal_engine import get_signal, run_full_top_coins_pipeline
 from utils.config import BOT_TOKEN, ADMIN_ID
+from utils.log_config import setup_logging
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
+setup_logging("bot.log")
 
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
@@ -300,8 +302,14 @@ async def main():
     finally:
         scheduler.shutdown()
 
+def handle_signal(signum, frame):
+    logging.info(f"Received signal {signum}, shutting down gracefully...")
+    raise SystemExit(0)
+
 if __name__ == "__main__":
+    signal.signal(signal.SIGTERM, handle_signal)
+    signal.signal(signal.SIGINT, handle_signal)
     try:
         asyncio.run(main())
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, SystemExit):
         logging.info("👋 Bot stopped manually.")

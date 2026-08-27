@@ -2,6 +2,7 @@
 
 import requests
 import json
+import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -9,7 +10,10 @@ from enum import Enum
 from typing import Any, Dict, List, Optional
 import pandas as pd
 
-from utils.config import PROVIDER
+from utils.config import PROVIDER, online_api_key
+from utils.retry import retry_on_exception
+
+logger = logging.getLogger(__name__)
 
 # ------------------------------------------------------------------
 # 1. Standardized Agent Output
@@ -98,7 +102,7 @@ class SharedLLMEngine:
         self.online_model_name = "MODSO"
         self.online_api_url = "http://localhost:20128/v1/chat/completions"
 
-        self.online_api_key = 'sk-33b802870023adb8-c6g5dq-007ea476'
+        self.online_api_key = online_api_key
 
     # ==========================================================
     # PUBLIC INTERFACE
@@ -137,15 +141,14 @@ class SharedLLMEngine:
             return self._normalize_response(result)
 
         except Exception as e:
-            print(f"[SharedLLMEngine] Error: {e}")
-
-            # حتی در صورت خطا هم قرارداد متد حفظ می‌شود
+            logger.error(f"[SharedLLMEngine] Error: {e}")
             return ""
 
     # ==========================================================
     # LOCAL
     # ==========================================================
 
+    @retry_on_exception(max_retries=3, delay=1.0, backoff=2.0, exceptions=(requests.RequestException,))
     def _generate_local(
         self,
         prompt: str,
@@ -185,6 +188,7 @@ class SharedLLMEngine:
     # ONLINE / 9ROUTER
     # ==========================================================
 
+    @retry_on_exception(max_retries=3, delay=1.0, backoff=2.0, exceptions=(requests.RequestException,))
     def _generate_online(
         self,
         prompt: str,
@@ -419,15 +423,55 @@ class DiscussingAgent(BaseAgent):
         """Round 1: Read all opinions, emit critiques/questions/support."""
         pass
 
-    @abstractmethod
     def revise_opinion(self, context: DiscussionContext) -> AgentOpinion:
-        """Round 2: Potentially change opinion based on discussion."""
-        pass
+        """Round 2: Default revision — reduce score by 30% if high-confidence critique received."""
+        my_prev = context.my_previous_opinion
+        if not my_prev:
+            return self.analyze_independent(context)
 
-    # Optional: agent-specific critique targets
+        should_revise = False
+        change_reason = None
+        for msg in context.messages_addressed_to_me:
+            if msg.message_type == MessageType.CRITIQUE and msg.confidence > 0.7:
+                should_revise = True
+                change_reason = f"Peer critique: {msg.content}"
+                break
+
+        if should_revise:
+            new_confidence = max(0.25, my_prev.confidence - 0.15)
+            new_score = my_prev.score * 0.7
+            return AgentOpinion(
+                agent_name=self.name, round_number=2,
+                signal=my_prev.signal, confidence=new_confidence, score=new_score,
+                reasoning=my_prev.reasoning + [f"REVISED: {change_reason}"],
+                key_evidence=my_prev.key_evidence,
+                acknowledged_risks=my_prev.acknowledged_risks + ["Peer concern noted"],
+                changed_from_previous=True, change_reason=change_reason,
+            )
+
+        return AgentOpinion(
+            agent_name=self.name, round_number=2,
+            signal=my_prev.signal, confidence=my_prev.confidence, score=my_prev.score,
+            reasoning=my_prev.reasoning, key_evidence=my_prev.key_evidence,
+            acknowledged_risks=my_prev.acknowledged_risks, changed_from_previous=False,
+        )
+
     def get_critique_priorities(self) -> List[str]:
         """Which agent types this agent most often critiques. Override to customize."""
         return []
+
+    @staticmethod
+    def parse_llm_json(response: str, agent_label: str = "LLM") -> Dict[str, Any]:
+        """Shared JSON parser for LLM responses with safe fallback."""
+        try:
+            data = json.loads(response)
+            return {
+                "score": float(data.get("score", 0)),
+                "reasoning": data.get("reasoning", f"{agent_label} analysis"),
+                "evidence": data.get("key_evidence", []),
+            }
+        except (json.JSONDecodeError, KeyError, ValueError):
+            return {"score": 0, "reasoning": f"Failed to parse {agent_label}", "evidence": []}
 
 
 # ------------------------------------------------------------------

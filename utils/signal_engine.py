@@ -7,7 +7,7 @@ from datetime import datetime
 # ایمپورت کلاس ربات شما
 from scripts.LiveTradeSignalBot import LiveSignalBot
 from utils.tep import translate_en_to_fa
-from scripts.WhachList import run_screener 
+from scripts.watch_list import run_screener
 
 async def get_signal(symbol: str, timeframe: str) -> str:
     logging.info(f"[Signal Engine] Starting analysis for {symbol} {timeframe}")

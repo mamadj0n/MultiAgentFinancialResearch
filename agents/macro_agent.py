@@ -10,6 +10,7 @@ from .agent_architecture_core import (
     BaseAgent, AgentOutput, SignalType, MarketContext, DiscussingAgent,
     DiscussionContext, AgentOpinion, DebateMessage, MessageType, RoundType, SharedLLMEngine
 )
+from utils.config import MACRO_BUY_THRESHOLD, MACRO_SELL_THRESHOLD
 
 
 class MacroAgent(DiscussingAgent):
@@ -54,16 +55,6 @@ class MacroAgent(DiscussingAgent):
                 "key_evidence": ["macro factor 1", "macro factor 2"]
                 }}"""
 
-    def _parse_llm_response(self, response: str) -> Dict[str, Any]:
-        try:
-            data = json.loads(response)
-            score = float(data.get("score", 0))
-            reasoning = data.get("reasoning", "LLM macro analysis")
-            evidence = data.get("key_evidence", [])
-            return {"score": score, "reasoning": reasoning, "evidence": evidence}
-        except (json.JSONDecodeError, KeyError, ValueError):
-            return {"score": 0, "reasoning": "Failed to parse LLM macro", "evidence": []}
-
     def analyze(self, context: MarketContext) -> AgentOutput:
         start_time = time.time()
 
@@ -77,21 +68,20 @@ class MacroAgent(DiscussingAgent):
             )
 
         latest_macro = context.macro_df.iloc[-1]
-        
-        # 1. گرفتن تحلیل از LLM
+
         prompt = self._build_macro_prompt(latest_macro)
         system_prompt = "You are a Chief Macro Economist. Output ONLY valid JSON."
         llm_response = self.llm_engine.generate(prompt, system_prompt)
-        parsed = self._parse_llm_response(llm_response)
+        parsed = self.parse_llm_json(llm_response, "MacroAgent")
         
         score = parsed["score"]
         reasoning = parsed["reasoning"]
         evidence = parsed["evidence"]
 
         # 2. تبدیل اسکور به سیگنال
-        if score >= 35:
+        if score >= MACRO_BUY_THRESHOLD:
             signal = SignalType.BUY
-        elif score <= -35:
+        elif score <= MACRO_SELL_THRESHOLD:
             signal = SignalType.SELL
         else:
             signal = SignalType.NEUTRAL
@@ -176,50 +166,6 @@ class MacroAgent(DiscussingAgent):
                     ))
         
         return messages
-
-    def revise_opinion(self, context: DiscussionContext) -> AgentOpinion:
-        my_prev = context.my_previous_opinion
-        if not my_prev:
-            return self.analyze_independent(context)
-        
-        should_revise = False
-        change_reason = None
-        
-        for msg in context.messages_addressed_to_me:
-            if msg.message_type == MessageType.CRITIQUE and msg.confidence > 0.7:
-                if "macro" in msg.content.lower() or "fundamental" in msg.content.lower():
-                    should_revise = True
-                    change_reason = f"Peer critique: {msg.content}"
-                    break
-        
-        if should_revise:
-            new_confidence = max(0.3, my_prev.confidence - 0.15)
-            new_score = my_prev.score * 0.7  # کاهش قدرت سیگنال
-            
-            return AgentOpinion(
-                agent_name=self.name,
-                round_number=2,
-                signal=my_prev.signal,
-                confidence=new_confidence,
-                score=new_score,
-                reasoning=my_prev.reasoning + [f"REVISED: {change_reason}"],
-                key_evidence=my_prev.key_evidence,
-                acknowledged_risks=my_prev.acknowledged_risks + ["Peer macro concern noted"],
-                changed_from_previous=True,
-                change_reason=change_reason,
-            )
-        
-        return AgentOpinion(
-            agent_name=self.name,
-            round_number=2,
-            signal=my_prev.signal,
-            confidence=my_prev.confidence,
-            score=my_prev.score,
-            reasoning=my_prev.reasoning,
-            key_evidence=my_prev.key_evidence,
-            acknowledged_risks=my_prev.acknowledged_risks,
-            changed_from_previous=False,
-        )
 
     def get_critique_priorities(self) -> List[str]:
         return ["technical", "sentiment", "fundamental"]

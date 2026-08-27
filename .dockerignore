@@ -1,0 +1,11 @@
+__pycache__
+*.pyc
+.git
+.env
+.env.*
+venv/
+*.db
+signals_history.json
+data/
+.vscode/
+.idea/

@@ -1,0 +1,52 @@
+2026-08-27 23:58:56 [INFO] apscheduler.scheduler: Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-08-27 23:58:56 [INFO] apscheduler.scheduler: Added job "scheduled_signal_job" to job store "default"
+2026-08-27 23:58:56 [INFO] apscheduler.scheduler: Scheduler started
+2026-08-27 23:58:56 [INFO] root: 🚀 Bot is running... (Press 'r' + Enter in terminal to restart)
+2026-08-27 23:58:56 [INFO] aiogram.dispatcher: Start polling
+2026-08-27 23:58:57 [INFO] aiogram.dispatcher: Run polling for bot @crypto_sys_onBOT id=8806028610 - 'cryptoBOT'
+2026-08-28 00:00:05 [INFO] apscheduler.executors.default: Running job "scheduled_signal_job (trigger: cron[minute='*/5', second='5'], next run at: 2026-08-27 20:35:05 UTC)" (scheduled at 2026-08-27 20:30:05+00:00)
+2026-08-28 00:00:05 [INFO] apscheduler.executors.default: Job "scheduled_signal_job (trigger: cron[minute='*/5', second='5'], next run at: 2026-08-27 20:35:05 UTC)" executed successfully
+2026-08-28 00:00:05 [INFO] aiogram.event: Update id=164068506 is handled. Duration 1470 ms by bot id=8806028610
+2026-08-28 00:00:07 [INFO] aiogram.event: Update id=164068507 is handled. Duration 314 ms by bot id=8806028610
+2026-08-28 00:00:25 [INFO] aiogram.event: Update id=164068508 is handled. Duration 296 ms by bot id=8806028610
+2026-08-28 00:00:27 [INFO] aiogram.event: Update id=164068509 is handled. Duration 254 ms by bot id=8806028610
+2026-08-28 00:00:30 [INFO] aiogram.event: Update id=164068510 is handled. Duration 459 ms by bot id=8806028610
+2026-08-28 00:00:30 [INFO] root: [Signal Engine] Starting analysis for BNBUSDT 5m
+2026-08-28 00:00:30 [INFO] scripts.LiveTradeSignalBot: [System] Initializing Live Signal Bot...
+2026-08-28 00:00:30 [INFO] scripts.LiveTradeSignalBot: [SignalGenerator] Loaded 4 past signals.
+2026-08-28 00:00:30 [INFO] scripts.LiveTradeSignalBot: 
+==================================================
+[System] Fetching live data for 2026-08-27T20:30:30.061678+00:00
+2026-08-28 00:00:30 [INFO] utils.DataCollect: [DataCollector] Fetching LIVE data from Binance via ccxt: BNBUSDT 5m UTC
+2026-08-28 00:01:25 [INFO] scripts.LiveTradeSignalBot: 🧠 [CONSENSUS ROOM] Starting debate...
+2026-08-28 00:01:54 [INFO] scripts.LiveTradeSignalBot: [R0] TechnicalAgent: NEUTRAL (Score: 0.0, Conf: 35%) 
+ ------------------------------
+2026-08-28 00:01:54 [INFO] scripts.LiveTradeSignalBot: [R0] MacroAgent: SELL (Score: -75.0, Conf: 90%) 
+ ------------------------------
+2026-08-28 00:01:54 [INFO] scripts.LiveTradeSignalBot: [R0] FundamentalAgent: SELL (Score: -20.0, Conf: 65%) 
+ ------------------------------
+2026-08-28 00:01:54 [INFO] scripts.LiveTradeSignalBot: [R0] SentimentAgent: SELL (Score: -20.0, Conf: 60%) 
+ ------------------------------
+2026-08-28 00:01:54 [INFO] scripts.LiveTradeSignalBot: [R0] RiskAgent: NEUTRAL (Score: 25.0, Conf: 90%) 
+ ------------------------------
+2026-08-28 00:01:54 [INFO] scripts.LiveTradeSignalBot: [R0] MemoryAgent: NEUTRAL (Score: 0.0, Conf: 50%) 
+ ------------------------------
+2026-08-28 00:02:04 [INFO] scripts.LiveTradeSignalBot: 🧠 [SUPERVISOR] Final Decision: SELL | Score: -30.0
+2026-08-28 00:05:05 [INFO] apscheduler.executors.default: Running job "scheduled_signal_job (trigger: cron[minute='*/5', second='5'], next run at: 2026-08-27 20:40:05 UTC)" (scheduled at 2026-08-27 20:35:05+00:00)
+2026-08-28 00:05:05 [INFO] apscheduler.executors.default: Job "scheduled_signal_job (trigger: cron[minute='*/5', second='5'], next run at: 2026-08-27 20:40:05 UTC)" executed successfully
+2026-08-28 00:10:05 [INFO] apscheduler.executors.default: Running job "scheduled_signal_job (trigger: cron[minute='*/5', second='5'], next run at: 2026-08-27 20:45:05 UTC)" (scheduled at 2026-08-27 20:40:05+00:00)
+2026-08-28 00:10:05 [INFO] apscheduler.executors.default: Job "scheduled_signal_job (trigger: cron[minute='*/5', second='5'], next run at: 2026-08-27 20:45:05 UTC)" executed successfully
+2026-08-28 00:15:05 [INFO] apscheduler.executors.default: Running job "scheduled_signal_job (trigger: cron[minute='*/5', second='5'], next run at: 2026-08-27 20:50:05 UTC)" (scheduled at 2026-08-27 20:45:05+00:00)
+2026-08-28 00:15:05 [INFO] apscheduler.executors.default: Job "scheduled_signal_job (trigger: cron[minute='*/5', second='5'], next run at: 2026-08-27 20:50:05 UTC)" executed successfully
+2026-08-28 00:20:05 [INFO] apscheduler.executors.default: Running job "scheduled_signal_job (trigger: cron[minute='*/5', second='5'], next run at: 2026-08-27 20:55:05 UTC)" (scheduled at 2026-08-27 20:50:05+00:00)
+2026-08-28 00:20:05 [INFO] apscheduler.executors.default: Job "scheduled_signal_job (trigger: cron[minute='*/5', second='5'], next run at: 2026-08-27 20:55:05 UTC)" executed successfully
+2026-08-28 00:25:05 [INFO] apscheduler.executors.default: Running job "scheduled_signal_job (trigger: cron[minute='*/5', second='5'], next run at: 2026-08-27 21:00:05 UTC)" (scheduled at 2026-08-27 20:55:05+00:00)
+2026-08-28 00:25:05 [INFO] apscheduler.executors.default: Job "scheduled_signal_job (trigger: cron[minute='*/5', second='5'], next run at: 2026-08-27 21:00:05 UTC)" executed successfully
+2026-08-28 00:30:05 [INFO] apscheduler.executors.default: Running job "scheduled_signal_job (trigger: cron[minute='*/5', second='5'], next run at: 2026-08-27 21:05:05 UTC)" (scheduled at 2026-08-27 21:00:05+00:00)
+2026-08-28 00:30:05 [INFO] apscheduler.executors.default: Job "scheduled_signal_job (trigger: cron[minute='*/5', second='5'], next run at: 2026-08-27 21:05:05 UTC)" executed successfully
+2026-08-28 00:35:05 [INFO] apscheduler.executors.default: Running job "scheduled_signal_job (trigger: cron[minute='*/5', second='5'], next run at: 2026-08-27 21:10:05 UTC)" (scheduled at 2026-08-27 21:05:05+00:00)
+2026-08-28 00:35:05 [INFO] apscheduler.executors.default: Job "scheduled_signal_job (trigger: cron[minute='*/5', second='5'], next run at: 2026-08-27 21:10:05 UTC)" executed successfully
+2026-08-28 00:40:05 [INFO] apscheduler.executors.default: Running job "scheduled_signal_job (trigger: cron[minute='*/5', second='5'], next run at: 2026-08-27 21:15:05 UTC)" (scheduled at 2026-08-27 21:10:05+00:00)
+2026-08-28 00:40:05 [INFO] apscheduler.executors.default: Job "scheduled_signal_job (trigger: cron[minute='*/5', second='5'], next run at: 2026-08-27 21:15:05 UTC)" executed successfully
+2026-08-28 00:45:05 [INFO] apscheduler.executors.default: Running job "scheduled_signal_job (trigger: cron[minute='*/5', second='5'], next run at: 2026-08-27 21:20:05 UTC)" (scheduled at 2026-08-27 21:15:05+00:00)
+2026-08-28 00:45:05 [INFO] apscheduler.executors.default: Job "scheduled_signal_job (trigger: cron[minute='*/5', second='5'], next run at: 2026-08-27 21:20:05 UTC)" executed successfully

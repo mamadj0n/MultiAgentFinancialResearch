@@ -13,7 +13,7 @@ try:
 except Exception:
     BackTestEngine = None
 
-from .WhachList import run_screener
+from .watch_list import run_screener
 
 __all__ = [
     "LiveSignalBot",

@@ -10,6 +10,7 @@ from .agent_architecture_core import (
     BaseAgent, AgentOutput, SignalType, MarketContext, DiscussingAgent,
     DiscussionContext, AgentOpinion, DebateMessage, MessageType, RoundType, SharedLLMEngine
 )
+from utils.config import FUNDAMENTAL_BUY_THRESHOLD, FUNDAMENTAL_SELL_THRESHOLD
 
 
 class FundamentalAgent(DiscussingAgent):
@@ -63,16 +64,6 @@ class FundamentalAgent(DiscussingAgent):
                 "key_evidence": ["on-chain metric 1", "on-chain metric 2"]
                 }}"""
 
-    def _parse_llm_response(self, response: str) -> Dict[str, Any]:
-        try:
-            data = json.loads(response)
-            score = float(data.get("score", 0))
-            reasoning = data.get("reasoning", "LLM fundamental analysis")
-            evidence = data.get("key_evidence", [])
-            return {"score": score, "reasoning": reasoning, "evidence": evidence}
-        except (json.JSONDecodeError, KeyError, ValueError):
-            return {"score": 0, "reasoning": "Failed to parse LLM fundamental", "evidence": []}
-
     def analyze(self, context: MarketContext) -> AgentOutput:
         start_time = time.time()
 
@@ -85,20 +76,19 @@ class FundamentalAgent(DiscussingAgent):
                 reasons=["Insufficient fundamental data"],
             )
 
-        # 1. گرفتن تحلیل از LLM
         prompt = self._build_fundamental_prompt(context)
         system_prompt = "You are a Crypto On-Chain Analyst. Output ONLY valid JSON."
         llm_response = self.llm_engine.generate(prompt, system_prompt)
-        parsed = self._parse_llm_response(llm_response)
+        parsed = self.parse_llm_json(llm_response, "FundamentalAgent")
         
         score = parsed["score"]
         reasoning = parsed["reasoning"]
         evidence = parsed["evidence"]
 
         # 2. تبدیل اسکور به سیگنال
-        if score >= 20:
+        if score >= FUNDAMENTAL_BUY_THRESHOLD:
             signal = SignalType.BUY
-        elif score <= -20:
+        elif score <= FUNDAMENTAL_SELL_THRESHOLD:
             signal = SignalType.SELL
         else:
             signal = SignalType.NEUTRAL
@@ -181,50 +171,6 @@ class FundamentalAgent(DiscussingAgent):
                     ))
         
         return messages
-
-    def revise_opinion(self, context: DiscussionContext) -> AgentOpinion:
-        my_prev = context.my_previous_opinion
-        if not my_prev:
-            return self.analyze_independent(context)
-        
-        should_revise = False
-        change_reason = None
-        
-        for msg in context.messages_addressed_to_me:
-            if msg.message_type == MessageType.CRITIQUE and msg.confidence > 0.65:
-                if "volume" in msg.content.lower() or "fundamental" in msg.content.lower() or "on-chain" in msg.content.lower():
-                    should_revise = True
-                    change_reason = f"Peer critique: {msg.content}"
-                    break
-        
-        if should_revise:
-            new_confidence = max(0.25, my_prev.confidence - 0.15)
-            new_score = my_prev.score * 0.7  # کاهش قدرت سیگنال
-            
-            return AgentOpinion(
-                agent_name=self.name,
-                round_number=2,
-                signal=my_prev.signal,
-                confidence=new_confidence,
-                score=new_score,
-                reasoning=my_prev.reasoning + [f"REVISED: {change_reason}"],
-                key_evidence=my_prev.key_evidence,
-                acknowledged_risks=my_prev.acknowledged_risks + ["Peer fundamental concern noted"],
-                changed_from_previous=True,
-                change_reason=change_reason,
-            )
-        
-        return AgentOpinion(
-            agent_name=self.name,
-            round_number=2,
-            signal=my_prev.signal,
-            confidence=my_prev.confidence,
-            score=my_prev.score,
-            reasoning=my_prev.reasoning,
-            key_evidence=my_prev.key_evidence,
-            acknowledged_risks=my_prev.acknowledged_risks,
-            changed_from_previous=False,
-        )
 
     def get_critique_priorities(self) -> List[str]:
         return ["technical", "sentiment", "macro"]

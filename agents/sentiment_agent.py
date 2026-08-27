@@ -10,6 +10,7 @@ from .agent_architecture_core import (
     BaseAgent, AgentOutput, SignalType, MarketContext, DiscussingAgent,
     DiscussionContext, AgentOpinion, DebateMessage, MessageType, RoundType, SharedLLMEngine
 )
+from utils.config import SENTIMENT_BUY_THRESHOLD, SENTIMENT_SELL_THRESHOLD
 
 
 class SentimentAgent(DiscussingAgent):
@@ -49,18 +50,6 @@ class SentimentAgent(DiscussingAgent):
         "key_evidence": ["headline 1", "headline 2"]
         }}"""
 
-    def _parse_llm_response(self, response: str) -> Dict[str, Any]:
-        """Parse LLM JSON response."""
-        try:
-            data = json.loads(response)
-            score = float(data.get("score", 0))
-            reasoning = data.get("reasoning", "LLM sentiment analysis")
-            evidence = data.get("key_evidence", [])
-            return {"score": score, "reasoning": reasoning, "evidence": evidence}
-        except (json.JSONDecodeError, KeyError, ValueError):
-            # در صورت خطا در پارسینگ، خنثی برمی‌گردانیم
-            return {"score": 0, "reasoning": "Failed to parse LLM sentiment", "evidence": []}
-
     def analyze(self, context: MarketContext) -> AgentOutput:
         start_time = time.time()
 
@@ -73,21 +62,20 @@ class SentimentAgent(DiscussingAgent):
                 reasons=["Insufficient news data"],
             )
 
-        # 1. ساخت پرامپت و گرفتن پاسخ از LLM
         prompt = self._build_sentiment_prompt(context.news_df)
         system_prompt = "You are a financial news sentiment analyzer. Output ONLY valid JSON."
-        
+
         llm_response = self.llm_engine.generate(prompt, system_prompt)
-        parsed = self._parse_llm_response(llm_response)
+        parsed = self.parse_llm_json(llm_response, "SentimentAgent")
         
         score = parsed["score"]
         reasoning = parsed["reasoning"]
         evidence = parsed["evidence"]
 
         # 2. تبدیل اسکور به سیگنال
-        if score >= 20:
+        if score >= SENTIMENT_BUY_THRESHOLD:
             signal = SignalType.BUY
-        elif score <= -20:
+        elif score <= SENTIMENT_SELL_THRESHOLD:
             signal = SignalType.SELL
         else:
             signal = SignalType.NEUTRAL

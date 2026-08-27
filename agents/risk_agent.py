@@ -10,6 +10,7 @@ from .agent_architecture_core import (
     BaseAgent, AgentOutput, SignalType, MarketContext, DiscussingAgent,
     DiscussionContext, AgentOpinion, DebateMessage, MessageType, RoundType
 )
+from utils.config import RISK_PCT_LOW, RISK_PCT_MED, RISK_PCT_HIGH, SL_MULT_LOW, SL_MULT_MED, SL_MULT_HIGH
 
 
 class RiskAgent(DiscussingAgent):
@@ -84,17 +85,17 @@ class RiskAgent(DiscussingAgent):
 
         # در ایجنت ریسک، پس از تحلیل وولاتیلیتی و VIX
         # تعیین پارامترهای ریسک به صورت داینامیک
-        if vol > 0.05 or vix > 30:  # بازار به شدت پرخطر است
-            risk_pct = 0.01  # فقط 1% ریسک
-            sl_multiplier = 2.5  # حد ضرر گسترده‌تر
+        if vol > 0.05 or vix > 30:
+            risk_pct = RISK_PCT_HIGH
+            sl_multiplier = SL_MULT_HIGH
             risk_level = "HIGH"
-        elif vol < 0.02 and vix < 15:  # بازار آرام و روند دار
-            risk_pct = 0.025  # 2.5% ریسک
-            sl_multiplier = 1.0  # حد ضررtight
+        elif vol < 0.02 and vix < 15:
+            risk_pct = RISK_PCT_LOW
+            sl_multiplier = SL_MULT_LOW
             risk_level = "LOW"
-        else:  # شرایط عادی
-            risk_pct = 0.02  # 2% ریسک
-            sl_multiplier = 1.5
+        else:
+            risk_pct = RISK_PCT_MED
+            sl_multiplier = SL_MULT_MED
             risk_level = "MEDIUM"
                 
         return AgentOutput(
