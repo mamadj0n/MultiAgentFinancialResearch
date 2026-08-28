@@ -1,7 +1,6 @@
 pandas_ta
 requests
 pandas 
-chromadb 
 numpy
 yfinance
 fredapi
