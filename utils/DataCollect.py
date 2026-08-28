@@ -45,48 +45,86 @@ class DataCollector:
 
     # ---------- بخش ۱: جمع‌آوری داده‌های قیمت ارز دیجیتال ----------
     def _collect_price_data(self) -> pd.DataFrame:
-        """Fetch price data. Uses Binance API (ccxt) for live, yfinance for historical."""
+        """Fetch price data. Uses Binance/KuCoin API (ccxt) for live, yfinance for historical."""
         
-        # تبدیل نماد یاهو به نماد صرافی (BTC-USD -> BTC/USDT)
-        symbol_ccxt = self.coin.replace("-USD", "/USDT").replace("-USDT", "/USDT")
-        
+        # ۱. نرمال‌سازی نمادها برای صرافی‌ها و یاهو فایننس
+        # تبدیل فرمت‌های مختلف به نماد CCXT (مثلاً ETH/USDT)
+        clean_coin = self.coin.upper().replace("-", "").replace("/", "")
+        if "USDT" in clean_coin:
+            base_symbol = clean_coin.replace("USDT", "")
+        elif "USD" in clean_coin:
+            base_symbol = clean_coin.replace("USD", "")
+        else:
+            base_symbol = clean_coin
+
+        symbol_ccxt = f"{base_symbol}/USDT"
+        symbol_yf = f"{base_symbol}-USD"
+
         if self.live_data:
+            # روش اصلی: تلاش برای دریافت از Binance با دامنه بدون تحریم
             try:
-                logger.info(f"[DataCollector] Fetching LIVE data from Binance via ccxt: {symbol_ccxt} {self.time_frame} {self.utc_tz}")
-                exchange = ccxt.binance()
+                logger.info(f"[DataCollector] Fetching LIVE data from Binance via ccxt: {symbol_ccxt} {self.time_frame}")
                 
-                # دریافت 1000 کندل اخیر (برای محاسبه EMA_200 و سایر اندیکاتورها)
+                exchange = ccxt.binance({
+                    'enableRateLimit': True,
+                    'options': {'defaultType': 'spot'}
+                })
+                # تغییر endpoint عمومی بایننس برای دور زدن تحریم IP دیتاسنترهای Render
+                exchange.urls['api']['public'] = 'https://data-api.binance.vision/api'
+                
                 limit = 1000
                 ohlcv = exchange.fetch_ohlcv(symbol_ccxt, self.time_frame, limit=limit)
                 
-                # تبدیل به دیتافریم پانداس
                 price = pd.DataFrame(ohlcv, columns=['Timestamp', 'Open', 'High', 'Low', 'Close', 'Volume'])
                 price['Timestamp'] = pd.to_datetime(price['Timestamp'], unit='ms')
                 price.set_index('Timestamp', inplace=True)
 
-                # اطمینان از timezone UTC
                 if price.index.tz is None:
                     price.index = price.index.tz_localize(self.utc_tz)
                 else:
                     price.index = price.index.tz_convert(self.utc_tz)
                     
                 return price
-                
+
             except Exception as e:
                 logger.error(f"[DataCollector] Error fetching Binance data via ccxt: {e}")
-                logger.warning("[DataCollector] Falling back to yfinance (may have delay)...")
-                price = yf.download(self.coin, period="5d", interval=self.time_frame, auto_adjust=False)
+                logger.warning("[DataCollector] Falling back to KuCoin via ccxt...")
+
+            # روش دوم (Fallback 1): تلاش برای دریافت از KuCoin در صورت خطای بایننس
+            try:
+                exchange_kc = ccxt.kucoin({'enableRateLimit': True})
+                limit = 1000
+                ohlcv = exchange_kc.fetch_ohlcv(symbol_ccxt, self.time_frame, limit=limit)
+                
+                price = pd.DataFrame(ohlcv, columns=['Timestamp', 'Open', 'High', 'Low', 'Close', 'Volume'])
+                price['Timestamp'] = pd.to_datetime(price['Timestamp'], unit='ms')
+                price.set_index('Timestamp', inplace=True)
+
+                if price.index.tz is None:
+                    price.index = price.index.tz_localize(self.utc_tz)
+                else:
+                    price.index = price.index.tz_convert(self.utc_tz)
+                    
+                return price
+
+            except Exception as e_kc:
+                logger.error(f"[DataCollector] KuCoin fallback also failed: {e_kc}")
+                logger.warning(f"[DataCollector] Falling back to yfinance with symbol: {symbol_yf}...")
+                
+                # روش سوم (Fallback 2): استفاده از yfinance با نماد اصلاح‌شده (ETH-USD)
+                price = yf.download(symbol_yf, period="5d", interval=self.time_frame, auto_adjust=False)
+
         else:
-            # برای بک‌تست همچنان از یاهو فایننس استفاده می‌کنیم
+            # برای بک‌تست تاریخی
             price = yf.download(
-                self.coin,
+                symbol_yf,
                 start=self.start_time,
                 end=self.finish_time,
                 interval=self.time_frame,
                 auto_adjust=False,
             )
 
-        # پردازش ستون‌های یاهو فایننس (در صورت استفاده از fallback یا بک‌تست)
+        # پردازش ستون‌های یاهو فایننس (در صورت استفاده از yfinance)
         if isinstance(price.columns, pd.MultiIndex):
             price.columns = price.columns.get_level_values(0)
 
