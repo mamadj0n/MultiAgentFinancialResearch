@@ -1,13 +1,31 @@
 # memory_store.py
+import os
 import sqlite3
 import threading
+from pathlib import Path
 from typing import List, Dict, Any
 import logging
 
 logger = logging.getLogger(__name__)
 
+def _default_memory_db():
+    # اولویت: /app/data (Render Disk) > data/ > ریشه
+    if os.getenv("TRADING_DB_PATH"):
+        return os.getenv("TRADING_DB_PATH")
+    if Path("/app/data").exists():
+        Path("/app/data").mkdir(parents=True, exist_ok=True)
+        return "/app/data/trading_memory.db"
+    # لوکال: data/trading_memory.db را ترجیح بده برای پایداری
+    Path("data").mkdir(parents=True, exist_ok=True)
+    # اگر فایل قدیمی در ریشه باشد و در data نباشد، همان را برگردان برای سازگاری
+    if Path("trading_memory.db").exists() and not Path("data/trading_memory.db").exists():
+        return "trading_memory.db"
+    return "data/trading_memory.db"
+
 class MemoryStore:
-    def __init__(self, db_path: str = "trading_memory.db"):
+    def __init__(self, db_path: str = None):
+        if db_path is None:
+            db_path = _default_memory_db()
         self.db_path = db_path
         self.conn = sqlite3.connect(db_path, check_same_thread=False)
         self._lock = threading.Lock()

@@ -10,6 +10,7 @@ trafilatura
 ccxt
 matplotlib
 aiogram
+aiohttp
 apscheduler
 aiosqlite
 googletrans==4.0.0rc1

@@ -178,8 +178,11 @@ def calculate_scores(metrics, btc_rs, btc_regime):
 # ==============================================================================
 # تابع ذخیره‌سازی داده‌ها در JSON
 # ==============================================================================
-def save_to_json_db(results, btc_regime, btc_change, total_scanned, output_dir="data"):
+def save_to_json_db(results, btc_regime, btc_change, total_scanned, output_dir=None):
     """ذخیره‌سازی ۲۰ برتر Long و ۲۰ برتر Short در فایل JSON (بدون all_symbols)"""
+    # Persistent Disk: اگر /app/data مانت شده، آنجا ذخیره کن
+    if output_dir is None:
+        output_dir = "/app/data" if os.path.exists("/app/data") else "data"
     os.makedirs(output_dir, exist_ok=True)
     
     # تفکیک ۲۰ تای برتر Long و Short

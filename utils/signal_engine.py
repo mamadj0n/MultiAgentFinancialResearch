@@ -41,6 +41,19 @@ async def get_signal(symbol: str, timeframe: str) -> str:
 # ---------------------------------------------------------------------
 # توابع کمکی (مشابه قبل با اصلاحات ریز)
 # ---------------------------------------------------------------------
+def _resolve_signals_file():
+    # با SignalGenerator هماهنگ - Render Disk را ترجیح بده
+    if os.path.exists("/app/data/signals_history.json"):
+        return "/app/data/signals_history.json"
+    if os.path.exists("data/signals_history.json"):
+        return "data/signals_history.json"
+    if os.path.exists("signals_history.json"):
+        return "signals_history.json"
+    # پیش‌فرض جدید
+    if os.path.exists("/app/data"):
+        return "/app/data/signals_history.json"
+    return "data/signals_history.json"
+
 async def get_signal_with_score(symbol: str, timeframe: str) -> dict:
     """تحلیل یک کوین و برگرداندن پیام همراه با اسکور اعتماد به نفس"""
     logging.info(f"[Top Engine] Analyzing {symbol} for scoring...")
@@ -49,7 +62,7 @@ async def get_signal_with_score(symbol: str, timeframe: str) -> dict:
     
     try:
         await loop.run_in_executor(None, bot_instance.run_cycle)
-        signals_file = "signals_history.json"
+        signals_file = _resolve_signals_file()
         
         with open(signals_file, "r", encoding='utf-8') as f:
             signals = json.load(f)
@@ -124,13 +137,19 @@ def format_signal_message(last_signal: dict, symbol: str, timeframe: str) -> str
 # ---------------------------------------------------------------------
 # پایپ‌لاین اصلی برترین‌های امروز (On-Demand) - نسخه اصلاح شده
 # ---------------------------------------------------------------------
+def _resolve_screener_file():
+    for p in ["/app/data/screener_latest.json", "data/screener_latest.json"]:
+        if os.path.exists(p):
+            return p
+    return "data/screener_latest.json"
+
 async def run_full_top_coins_pipeline(bot_instance, user_id: int):
     """
     1. اجرای اسکرینر برای پیدا کردن 2 لانگ و 2 شورت برتر
     2. تحلیل 4 کوین با هوش مصنوعی (با تاخیر برای ریت لیمیت)
     3. ذخیره و ارسال نتیجه به صورت پیام‌های مجزا برای جلوگیری از خطای طول پیام
     """
-    screener_file = "data/screener_latest.json"
+    screener_file = _resolve_screener_file()
     
     try:
         # مرحله اول: اسکن بازار
@@ -172,15 +191,16 @@ async def run_full_top_coins_pipeline(bot_instance, user_id: int):
         # مرحله سوم: مرتب‌سازی بر اساس بالاترین اسکور
         top_4_final = sorted(analysis_results, key=lambda x: x["score"], reverse=True)
         
-        # ذخیره در فایل
-        os.makedirs("data", exist_ok=True)
+        # ذخیره در فایل - Render Disk را ترجیح بده
+        data_dir = "/app/data" if os.path.exists("/app/data") else "data"
+        os.makedirs(data_dir, exist_ok=True)
         today_str = datetime.now().strftime("%Y-%m-%d")
         save_data = {
             "date": today_str,
             "generated_at": datetime.now().isoformat(),
             "top_signals": top_4_final
         }
-        with open("data/daily_top_signals.json", "w", encoding="utf-8") as f:
+        with open(f"{data_dir}/daily_top_signals.json", "w", encoding="utf-8") as f:
             json.dump(save_data, f, ensure_ascii=False, indent=2)
 
         # مرحله چهارم: ارسال پیام هدر

@@ -15,6 +15,7 @@ from datetime import datetime, timezone
 from apscheduler.triggers.cron import CronTrigger
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
+from aiohttp import web
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from utils.database import init_db, save_user_settings, get_user, set_user_active, get_active_users_grouped, get_all_users
@@ -27,6 +28,23 @@ setup_logging("bot.log")
 
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
+
+# ---------------------------------------------------------------------
+# Health Check Server برای Render (جلوگیری از خطای Port/Health Check)
+# ---------------------------------------------------------------------
+async def health_check(request):
+    return web.Response(text="Bot is live and running!")
+
+async def start_health_server():
+    app = web.Application()
+    app.router.add_get('/', health_check)
+    app.router.add_get('/health', health_check)
+    runner = web.AppRunner(app)
+    await runner.setup()
+    port = int(os.environ.get("PORT", 8080))
+    site = web.TCPSite(runner, '0.0.0.0', port)
+    await site.start()
+    logging.info(f"🌐 Health check server started on port {port}")
 
 # ---------------------------------------------------------------------
 # قفل سراسری برای جلوگیری از اسپم و درخواست‌های همزمان (Rate Limit Protection)
@@ -291,6 +309,9 @@ async def main():
     
     scheduler.add_job(scheduled_signal_job, trigger=CronTrigger(minute='*/5', second=5, timezone='UTC'))
     scheduler.start()
+    
+    # اجرای سرور Health Check در پس‌زمینه همزمان با ربات (برای Render)
+    await start_health_server()
     
     # فعال‌سازی گوش‌به‌زنگ ورودی ترمینال در پس‌زمینه
     asyncio.create_task(listen_for_restart_key())

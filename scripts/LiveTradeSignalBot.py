@@ -41,8 +41,23 @@ logger = logging.getLogger(__name__)
 # =====================================================================
 # 2. تولیدکننده سیگنال (بدون اجرای ترید واقعی)
 # =====================================================================
+def _default_signals_file():
+    # اولویت Render Disk
+    if os.getenv("SIGNALS_FILE"):
+        return os.getenv("SIGNALS_FILE")
+    if os.path.exists("/app/data"):
+        os.makedirs("/app/data", exist_ok=True)
+        return "/app/data/signals_history.json"
+    os.makedirs("data", exist_ok=True)
+    # سازگاری با فایل قدیمی در ریشه
+    if os.path.exists("signals_history.json") and not os.path.exists("data/signals_history.json"):
+        return "signals_history.json"
+    return "data/signals_history.json"
+
 class SignalGenerator:
-    def __init__(self, initial_capital: float = 1000.0, signals_file: str = "signals_history.json"):
+    def __init__(self, initial_capital: float = 1000.0, signals_file: str = None):
+        if signals_file is None:
+            signals_file = _default_signals_file()
         self.initial_capital = initial_capital
         self.signals_file = signals_file
         self.signals_history = []

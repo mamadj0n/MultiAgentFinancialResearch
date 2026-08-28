@@ -1,8 +1,36 @@
 import aiosqlite
 import logging
+import os
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
-DB_NAME = "bot_database.db"
+
+# --- Persistent Disk Support برای Render ---
+# اگر دیسک روی /app/data مانت شده باشد، از آن استفاده کن، وگرنه از پوشه data/ یا ریشه
+def _get_db_path():
+    for candidate in ["/app/data", "data", "."]:
+        p = Path(candidate)
+        if p.exists() or candidate == "/app/data":
+            # در Render حتما /app/data را بساز حتی اگر وجود نداشت
+            if candidate == "/app/data":
+                try:
+                    p.mkdir(parents=True, exist_ok=True)
+                except Exception:
+                    pass
+                return str(p / "bot_database.db")
+            # برای لوکال: اگر data وجود داشت آنجا، وگرنه ریشه برای سازگاری عقب‌رو
+            if candidate == "data":
+                try:
+                    p.mkdir(parents=True, exist_ok=True)
+                except Exception:
+                    pass
+                # اگر /app/data وجود دارد اولویت دارد، وگرنه data/
+                if Path("/app/data").exists():
+                    return "/app/data/bot_database.db"
+                return str(p / "bot_database.db")
+    return "bot_database.db"
+
+DB_NAME = os.getenv("BOT_DB_PATH", _get_db_path())
 
 async def init_db():
     async with aiosqlite.connect(DB_NAME) as db:
