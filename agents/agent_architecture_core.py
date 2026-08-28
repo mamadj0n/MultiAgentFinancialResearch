@@ -10,7 +10,7 @@ from enum import Enum
 from typing import Any, Dict, List, Optional
 import pandas as pd
 
-from utils.config import PROVIDER, online_api_key
+from utils.config import PROVIDER, online_api_key, GOOGLE_AI_STUDIO_API_KEY
 from utils.retry import retry_on_exception
 
 logger = logging.getLogger(__name__)
@@ -97,12 +97,12 @@ class SharedLLMEngine:
         self.local_api_url = "http://localhost:11434/api/generate"
 
         # =========================
-        # Online / 9router
+        # Online / Google AI Studio (Gemini)
         # =========================
-        self.online_model_name = "MODSO"
-        self.online_api_url = "http://localhost:20128/v1/chat/completions"
+        self.online_model_name = "gemini-2.0-flash"
+        self.online_api_url = "https://generativelanguage.googleapis.com/v1beta/models"
 
-        self.online_api_key = online_api_key
+        self.online_api_key = GOOGLE_AI_STUDIO_API_KEY or online_api_key
 
     # ==========================================================
     # PUBLIC INTERFACE
@@ -185,7 +185,7 @@ class SharedLLMEngine:
         return data.get("response", "")
 
     # ==========================================================
-    # ONLINE / 9ROUTER
+    # ONLINE / Google AI Studio (Gemini)
     # ==========================================================
 
     @retry_on_exception(max_retries=3, delay=1.0, backoff=2.0, exceptions=(requests.RequestException,))
@@ -194,35 +194,43 @@ class SharedLLMEngine:
         prompt: str,
         system_prompt: str = ""
     ):
-        messages = []
+        if not self.online_api_key:
+            raise ValueError(
+                "GOOGLE_AI_STUDIO_API_KEY or API_KEY env var not set. "
+                "Get a key from https://aistudio.google.com/apikey"
+            )
+
+        contents = []
 
         if system_prompt:
-            messages.append({
-                "role": "system",
-                "content": system_prompt
+            contents.append({
+                "role": "user",
+                "parts": [{"text": system_prompt}]
+            })
+            contents.append({
+                "role": "model",
+                "parts": [{"text": "Understood. I will follow these instructions."}]
             })
 
-        messages.append({
+        contents.append({
             "role": "user",
-            "content": prompt
+            "parts": [{"text": prompt}]
         })
 
         payload = {
-            "model": self.online_model_name,
-            "messages": messages,
-            "temperature": 0.1,
-            "max_tokens": 512,
-            "stream": False,
+            "contents": contents,
+            "generationConfig": {
+                "temperature": 0.1,
+                "maxOutputTokens": 512,
+            }
         }
 
-        headers = {
-            "Authorization": f"Bearer {self.online_api_key}",
-            "Content-Type": "application/json",
-        }
+        api_url = f"{self.online_api_url}/{self.online_model_name}:generateContent"
 
         response = requests.post(
-            self.online_api_url,
-            headers=headers,
+            api_url,
+            params={"key": self.online_api_key},
+            headers={"Content-Type": "application/json"},
             json=payload,
             timeout=300
         )
@@ -231,25 +239,23 @@ class SharedLLMEngine:
 
         data = response.json()
 
-        # OpenAI-compatible response
+        # Gemini response structure:
         #
         # {
-        #     "choices": [
+        #     "candidates": [
         #         {
-        #             "message": {
-        #                 "content": "..."
+        #             "content": {
+        #                 "parts": [{"text": "..."}],
+        #                 "role": "model"
         #             }
         #         }
         #     ]
         # }
 
         try:
-            return data["choices"][0]["message"]["content"]
+            return data["candidates"][0]["content"]["parts"][0]["text"]
 
         except (KeyError, IndexError, TypeError):
-            # اگر ساختار API متفاوت بود،
-            # خود response را برمی‌گردانیم تا
-            # _normalize_response آن را تبدیل کند.
             return data
 
     # ==========================================================

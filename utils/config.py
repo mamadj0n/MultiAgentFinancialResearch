@@ -10,6 +10,7 @@ FASTAPI_PORT = int(os.getenv("FASTAPI_PORT", "8000"))
 BOT_TOKEN = os.getenv("TELEGRAM_TOKEN")
 FRED_API_KEY = os.getenv("FRED_TOKEN")
 online_api_key = os.getenv("API_KEY")
+GOOGLE_AI_STUDIO_API_KEY = os.getenv("GOOGLE_AI_STUDIO_API_KEY")
 ADMIN_ID = int(os.getenv("ADMIN_ID", "0"))
 
 # --- Agent Thresholds ---
